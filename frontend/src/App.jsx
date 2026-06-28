@@ -1,56 +1,99 @@
+import { useState, useEffect } from 'react'
+import Header from './components/layout/Header.jsx'
+import TaskForm from './components/tasks/TaskForm.jsx'
+import TaskList from './components/tasks/TaskList.jsx'
 import Button from './components/common/Button.jsx'
+import { taskAPI } from './services/api.js'
 import { useNotification } from './context/NotificationContext.jsx'
 import './App.css'
 
 function App() {
   const { notify } = useNotification()
+  const [tasks, setTasks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+
+  // 1. Fetch tasks when the app loads
+  const fetchTasks = async () => {
+    try {
+      setLoading(true)
+      const { data } = await taskAPI.getAll()
+      setTasks(data)
+    } catch (error) {
+      notify(error.message, 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchTasks()
+  }, [])
+
+  // 2. Create a new task
+  const handleCreateTask = async (taskData) => {
+    try {
+      await taskAPI.create(taskData)
+      notify('Task created successfully! ', 'success')
+      setShowForm(false)
+      fetchTasks() // Refresh the list
+    } catch (error) {
+      notify(error.message, 'error')
+    }
+  }
+
+  // 3. Delete a task
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this task?')) return
+    
+    try {
+      await taskAPI.delete(id)
+      notify('Task deleted', 'info')
+      fetchTasks()
+    } catch (error) {
+      notify(error.message, 'error')
+    }
+  }
+
+  // 4. Toggle task completion
+  const handleToggleComplete = async (id) => {
+    const task = tasks.find(t => t._id === id)
+    const newStatus = task.status === 'completed' ? 'pending' : 'completed'
+    
+    try {
+      await taskAPI.update(id, { ...task, status: newStatus })
+      notify(newStatus === 'completed' ? 'Task completed! ' : 'Task reopened', 'success')
+      fetchTasks()
+    } catch (error) {
+      notify(error.message, 'error')
+    }
+  }
 
   return (
     <div className="app">
-      <h1>📋 Task Tracker</h1>
-      <p>Testing our reusable components!</p>
+      <Header />
 
-      <div style={{ marginTop: '2rem' }}>
-        <h2>Buttons:</h2>
-        <Button variant="primary">Primary Button</Button>
-        {' '}
-        <Button variant="secondary">Secondary</Button>
-        {' '}
-        <Button variant="success">Success</Button>
-        {' '}
-        <Button variant="danger">Danger</Button>
-      </div>
+      <main className="container">
+        {!showForm && (
+          <Button variant="primary" onClick={() => setShowForm(true)}>
+            ➕ Add New Task
+          </Button>
+        )}
 
-      <div style={{ marginTop: '2rem' }}>
-        <h2>Input:</h2>
-        <Button variant="primary" onClick={() => {
-          notify('Task created successfully!', 'success')
-        }}>
-          Show Success Toast
-        </Button>
-        {' '}
-        <Button variant="danger" onClick={() => {
-          notify('Failed to delete task', 'error')
-        }}>
-          Show Error Toast
-        </Button>
-        {' '}
-        <Button variant="secondary" onClick={() => {
-          notify('Please check your input', 'info')
-        }}>
-          Show Info Toast
-        </Button>
-      </div>
+        {showForm && (
+          <TaskForm
+            onSubmit={handleCreateTask}
+            onCancel={() => setShowForm(false)}
+          />
+        )}
 
-      <div style={{ marginTop: '2rem' }}>
-        <h2>Loader:</h2>
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <div style={{ width: '200px' }}>
-            {/* We'll just show the loader text here for now */}
-            <p style={{ color: 'var(--text-muted)' }}>Loader component works! ✓</p>
-          </div>
-        </div>
-      </div>
+        <TaskList 
+          tasks={tasks} 
+          loading={loading}
+          onDelete={handleDelete}
+          onToggleComplete={handleToggleComplete}
+        />
+      </main>
     </div>
   )
 }
