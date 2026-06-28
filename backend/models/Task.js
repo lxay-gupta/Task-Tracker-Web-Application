@@ -15,12 +15,14 @@ const taskSchema = new mongoose.Schema(
       default: '',
     },
     status: {
+          status: {
       type: String,
       enum: {
-        values: ['pending', 'in-progress', 'completed'],
+        values: ['pending', 'completed'], // Removed 'in-progress'
         message: '{VALUE} is not a valid status',
       },
       default: 'pending',
+    },
     },
     priority: {
       type: String,

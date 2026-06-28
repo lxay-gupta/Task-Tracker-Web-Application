@@ -1,11 +1,26 @@
 import Button from '../common/Button.jsx'
 
-const TaskItem = ({ task, onDelete, onToggleComplete }) => {
+const TaskItem = ({ task, onDelete, onStatusChange }) => {
   // Helper to format the date nicely
   const formatDate = (dateString) => {
     if (!dateString) return null
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  // 1. Simply toggle between pending and completed
+  const getNextStatus = () => {
+    return task.status === 'completed' ? 'pending' : 'completed'
+  }
+
+  // 2. Change the button text based on current status
+  const getStatusButtonLabel = () => {
+    return task.status === 'completed' ? '↩️ Reopen' : '✓ Complete'
+  }
+
+  // 3. Change the button color based on current status
+  const getStatusButtonVariant = () => {
+    return task.status === 'completed' ? 'secondary' : 'success'
   }
 
   return (
@@ -25,17 +40,17 @@ const TaskItem = ({ task, onDelete, onToggleComplete }) => {
         </h4>
         {task.description && <p className="task-description">{task.description}</p>}
         {task.dueDate && (
-          <p className="task-due">📅 Due: {formatDate(task.dueDate)}</p>
+          <p className="task-due"> Due: {formatDate(task.dueDate)}</p>
         )}
       </div>
 
       <div className="task-actions">
         <Button 
-          variant={task.status === 'completed' ? 'secondary' : 'success'} 
+          variant={getStatusButtonVariant()} 
           size="sm"
-          onClick={() => onToggleComplete(task._id)}
+          onClick={() => onStatusChange(task._id, getNextStatus())}
         >
-          {task.status === 'completed' ? 'Undo' : '✓ Complete'}
+          {getStatusButtonLabel()}
         </Button>
         <Button variant="danger" size="sm" onClick={() => onDelete(task._id)}>
           Delete

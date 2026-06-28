@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Header from './components/layout/Header.jsx'
 import TaskForm from './components/tasks/TaskForm.jsx'
 import TaskList from './components/tasks/TaskList.jsx'
+import TaskFilters from './components/tasks/TaskFilters.jsx'
 import Button from './components/common/Button.jsx'
 import { taskAPI } from './services/api.js'
 import { useNotification } from './context/NotificationContext.jsx'
@@ -12,12 +13,25 @@ function App() {
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  
+  // 1. State for our filters
+  const [filters, setFilters] = useState({
+    status: 'all',
+    priority: 'all',
+    sortBy: 'createdAt'
+  })
 
-  // 1. Fetch tasks when the app loads
+  // 2. Fetch tasks (now includes filters!)
   const fetchTasks = async () => {
     try {
       setLoading(true)
-      const { data } = await taskAPI.getAll()
+      // Only send filters to the backend if they aren't 'all'
+      const params = {}
+      if (filters.status !== 'all') params.status = filters.status
+      if (filters.priority !== 'all') params.priority = filters.priority
+      params.sortBy = filters.sortBy
+
+      const { data } = await taskAPI.getAll(params)
       setTasks(data)
     } catch (error) {
       notify(error.message, 'error')
@@ -26,26 +40,24 @@ function App() {
     }
   }
 
+  // 3. Re-fetch whenever filters change!
   useEffect(() => {
     fetchTasks()
-  }, [])
+  }, [filters]) // <-- This triggers fetchTasks when filters update
 
-  // 2. Create a new task
   const handleCreateTask = async (taskData) => {
     try {
       await taskAPI.create(taskData)
-      notify('Task created successfully! ', 'success')
+      notify('Task created successfully! 🎉', 'success')
       setShowForm(false)
-      fetchTasks() // Refresh the list
+      fetchTasks()
     } catch (error) {
       notify(error.message, 'error')
     }
   }
 
-  // 3. Delete a task
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this task?')) return
-    
     try {
       await taskAPI.delete(id)
       notify('Task deleted', 'info')
@@ -55,14 +67,12 @@ function App() {
     }
   }
 
-  // 4. Toggle task completion
   const handleToggleComplete = async (id) => {
     const task = tasks.find(t => t._id === id)
     const newStatus = task.status === 'completed' ? 'pending' : 'completed'
-    
     try {
       await taskAPI.update(id, { ...task, status: newStatus })
-      notify(newStatus === 'completed' ? 'Task completed! ' : 'Task reopened', 'success')
+      notify(newStatus === 'completed' ? 'Task completed! 🎉' : 'Task reopened', 'success')
       fetchTasks()
     } catch (error) {
       notify(error.message, 'error')
@@ -86,6 +96,9 @@ function App() {
             onCancel={() => setShowForm(false)}
           />
         )}
+
+        {/* 4. Add the Filters here! */}
+        <TaskFilters filters={filters} setFilters={setFilters} />
 
         <TaskList 
           tasks={tasks} 

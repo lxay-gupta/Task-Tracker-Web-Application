@@ -15,9 +15,16 @@ const handleResponse = async (response) => {
 }
 
 export const taskAPI = {
-  getAll: async () => {
-    const response = await fetch(`${API_URL}/tasks`)
+  getAll: async (params = {}) => {
+
+    // Convert the params object into a URL query string
+    // e.g., { status: 'pending', priority: 'high' } becomes ?status=pending&priority=high
+    const queryString = new URLSearchParams(params).toString()
+    const url = `${API_URL}/tasks${queryString ? `?${queryString}` : ''}`
+    
+    const response = await fetch(url)
     return handleResponse(response)
+    
   },
 
   create: async (taskData) => {
