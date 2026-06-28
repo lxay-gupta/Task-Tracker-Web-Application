@@ -13,19 +13,16 @@ function App() {
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  
-  // 1. State for our filters
+
   const [filters, setFilters] = useState({
     status: 'all',
     priority: 'all',
     sortBy: 'createdAt'
   })
 
-  // 2. Fetch tasks (now includes filters!)
   const fetchTasks = async () => {
     try {
       setLoading(true)
-      // Only send filters to the backend if they aren't 'all'
       const params = {}
       if (filters.status !== 'all') params.status = filters.status
       if (filters.priority !== 'all') params.priority = filters.priority
@@ -40,10 +37,9 @@ function App() {
     }
   }
 
-  // 3. Re-fetch whenever filters change!
   useEffect(() => {
     fetchTasks()
-  }, [filters]) // <-- This triggers fetchTasks when filters update
+  }, [filters])
 
   const handleCreateTask = async (taskData) => {
     try {
@@ -67,12 +63,14 @@ function App() {
     }
   }
 
-  const handleToggleComplete = async (id) => {
+    const handleStatusChange = async (id, newStatus) => {
+    // Find the full task object from our state
     const task = tasks.find(t => t._id === id)
-    const newStatus = task.status === 'completed' ? 'pending' : 'completed'
+    
     try {
+      // Send the ENTIRE task object, but with the updated status
       await taskAPI.update(id, { ...task, status: newStatus })
-      notify(newStatus === 'completed' ? 'Task completed! 🎉' : 'Task reopened', 'success')
+      notify(`Task updated!`, 'success')
       fetchTasks()
     } catch (error) {
       notify(error.message, 'error')
@@ -97,14 +95,13 @@ function App() {
           />
         )}
 
-        {/* 4. Add the Filters here! */}
         <TaskFilters filters={filters} setFilters={setFilters} />
 
         <TaskList 
           tasks={tasks} 
           loading={loading}
           onDelete={handleDelete}
-          onToggleComplete={handleToggleComplete}
+          onStatusChange={handleStatusChange}
         />
       </main>
     </div>

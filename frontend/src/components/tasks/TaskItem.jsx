@@ -23,19 +23,23 @@ const TaskItem = ({ task, onDelete, onStatusChange }) => {
     return task.status === 'completed' ? 'secondary' : 'success'
   }
 
+  // 4. Safely get the status as a string
+  const status = typeof task.status === 'string' ? task.status : 'pending'
+  const priority = typeof task.priority === 'string' ? task.priority : 'medium'
+
   return (
-    <div className={`task-item priority-${task.priority}`}>
+    <div className={`task-item priority-${priority}`}>
       <div className="task-header">
-        <span className={`badge priority-badge priority-${task.priority}`}>
-          {task.priority.toUpperCase()}
+        <span className={`badge priority-badge priority-${priority}`}>
+          {priority.toUpperCase()}
         </span>
-        <span className={`badge status-badge status-${task.status}`}>
-          {task.status}
+        <span className={`badge status-badge status-${status}`}>
+          {status}
         </span>
       </div>
 
       <div className="task-body">
-        <h4 className={`task-title ${task.status === 'completed' ? 'completed' : ''}`}>
+        <h4 className={`task-title ${status === 'completed' ? 'completed' : ''}`}>
           {task.title}
         </h4>
         {task.description && <p className="task-description">{task.description}</p>}

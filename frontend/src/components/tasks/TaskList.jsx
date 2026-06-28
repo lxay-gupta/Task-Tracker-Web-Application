@@ -1,7 +1,7 @@
 import TaskItem from './TaskItem.jsx'
 import Loader from '../common/Loader.jsx'
 
-const TaskList = ({ tasks, loading, onDelete, onToggleComplete }) => {
+const TaskList = ({ tasks, loading, onDelete, onStatusChange }) => {
   if (loading) return <Loader text="Loading tasks..." />
 
   if (!tasks || tasks.length === 0) {
@@ -21,7 +21,7 @@ const TaskList = ({ tasks, loading, onDelete, onToggleComplete }) => {
           key={task._id}
           task={task}
           onDelete={onDelete}
-          onToggleComplete={onToggleComplete}
+          onStatusChange={onStatusChange}
         />
       ))}
     </div>
