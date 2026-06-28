@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api'
+const API_URL = 'https://task-tracker-web-application-ycq0.onrender.com/api'
 
 const handleResponse = async (response) => {
   const data = await response.json()
