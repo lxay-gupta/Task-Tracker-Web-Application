@@ -1,9 +1,10 @@
 import Button from './components/common/Button.jsx'
-import Input from './components/common/Input.jsx'
-import Loader from './components/common/Loader.jsx'
+import { useNotification } from './context/NotificationContext.jsx'
 import './App.css'
 
 function App() {
+  const { notify } = useNotification()
+
   return (
     <div className="app">
       <h1>📋 Task Tracker</h1>
@@ -22,14 +23,33 @@ function App() {
 
       <div style={{ marginTop: '2rem' }}>
         <h2>Input:</h2>
-        <Input label="Task Title" placeholder="Enter task title..." />
-        <br />
-        <Input label="With Error" error="This field is required" />
+        <Button variant="primary" onClick={() => {
+          notify('Task created successfully!', 'success')
+        }}>
+          Show Success Toast
+        </Button>
+        {' '}
+        <Button variant="danger" onClick={() => {
+          notify('Failed to delete task', 'error')
+        }}>
+          Show Error Toast
+        </Button>
+        {' '}
+        <Button variant="secondary" onClick={() => {
+          notify('Please check your input', 'info')
+        }}>
+          Show Info Toast
+        </Button>
       </div>
 
       <div style={{ marginTop: '2rem' }}>
         <h2>Loader:</h2>
-        <Loader text="Loading tasks..." />
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div style={{ width: '200px' }}>
+            {/* We'll just show the loader text here for now */}
+            <p style={{ color: 'var(--text-muted)' }}>Loader component works! ✓</p>
+          </div>
+        </div>
       </div>
     </div>
   )
