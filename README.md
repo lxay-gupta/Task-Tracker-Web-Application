@@ -58,7 +58,7 @@ Want to run this project on your own machine? Follow these steps:
 4. Open your browser and navigate to http://localhost:5173
 
 Live Demo
-[Link will be added here once deployed!]
+https://task-tracker-web-application-khaki.vercel.app
 
 License
 This project is licensed under the MIT License.
